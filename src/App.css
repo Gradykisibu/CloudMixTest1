@@ -36,3 +36,33 @@
     transform: rotate(360deg);
   }
 }
+
+.icon.active {
+  color: white;
+  cursor: pointer;
+}
+
+.icon.unactive{
+  color: grey; 
+  cursor: pointer;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background-color: #101010;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #777777; 
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #1e1e1e; 
+}
