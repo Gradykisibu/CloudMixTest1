@@ -1,6 +1,8 @@
 import React, { useEffect, createContext, useContext, useState ,useCallback} from "react";
 import { auth, firestore } from "../../../Firebase/firebase"; // Fix the import
 import { doc, getDoc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+
 
 // Create our context with the imported createContext from React
 const AuthContext = createContext();
@@ -9,6 +11,7 @@ const AuthContext = createContext();
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [authenticatedUser, setAuthenticatedUser] = useState();
+  const nav = useNavigate()
 
   useEffect(() => {
     // Subscribe to authentication state changes
@@ -21,6 +24,7 @@ export const AuthContextProvider = ({ children }) => {
       } else {
         // No user is signed in
         console.log("No user signed in.");
+        nav('/signup')
         setUser(null); // Set the user state to null when no user is signed in
       }
     });
@@ -88,5 +92,3 @@ export const AuthContextProvider = ({ children }) => {
 export const useAuthContext = () => {
   return useContext(AuthContext);
 };
-
-// export { fetchData };
