@@ -189,7 +189,8 @@ function UsersInformation() {
           >
             <GroupsIcon fontSize="medium" />
             <p style={{ fontSize: "11px", color: "#777777" }}>
-              {userInfo?.followedUsers?.length}{" "}
+              
+              <span style={{marginRight:"5px"}}>{!userInfo?.followedUsers?.length ? 0 : userInfo.followedUsers.length}</span>
               {userInfo?.followedUsers?.length === 1 ? "Follower" : "Followers"}
             </p>
           </Box>
