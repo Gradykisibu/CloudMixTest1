@@ -1,4 +1,4 @@
-import React  from "react";
+import React, { useState }  from "react";
 import styles from "./profileScreen.module.css";
 import Box from "@mui/material/Box";
 import { styled } from "@mui/material/styles";
@@ -9,6 +9,8 @@ import BasicModal from "../common/Modal/Modal";
 import BasicTabs from "../common/Tabs/Tabs";
 import { useAuthContext } from "../context/AuthContext/AuthContext";
 import Stack from "@mui/material/Stack";
+import FollowCountModal from "./../common/FollowCountModal/FollowCountModal"
+import Utilities from "../../utilities";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -41,6 +43,19 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 
 function ProfileScreen() {
   const { user } = useAuthContext();
+  const [ underline, setUnderline ] = useState(false);
+  const { getAllUsersFromFirestore } = Utilities();
+  const [ getUsers, setGetUsers ] = useState([])
+
+    const fetchAllUsers = async () => {
+      try {
+        const allUsers = await getAllUsersFromFirestore();
+        console.log('All users:', allUsers);
+        setGetUsers(allUsers)
+      } catch (error) {
+        console.error('Error fetching all users:', error);
+      }
+    };
 
   return (
     <>
@@ -103,11 +118,12 @@ function ProfileScreen() {
             }}
           >
             <GroupsIcon fontSize="medium" />
-            <p style={{ fontSize: "11px", color: "#777777" }}>
-              {user?.followedUsers?.length}{" "}
-              {user?.followedUsers?.length === 1 ? "Follower" : "Followers"}
+            <p style={{ fontSize: "11px", color: "#777777", cursor:"pointer" , textDecoration:!underline ? "none" : "underline", display:"flex", alignItems:"center", justifyContent:"center"}} onMouseEnter={() =>  setUnderline(true)} onMouseLeave={() => setUnderline(false)} onClick={fetchAllUsers}>
+              <span style={{marginRight:"5px"}}>{user?.followedUsers?.length <= 0 ? 0 : user?.followedUsers?.length }</span>
+              {user?.followedUsers?.length === 1 ? <FollowCountModal Follow='Follower' getUsers={getUsers} /> : <FollowCountModal Follow='Followers' getUsers={getUsers}/>}
             </p>
           </Box>
+
           <Box>
             <img
               src="https://www.logomaker.com/api/main/images/1j+ojFVDOMkX9Wytexe43D6kh...CCrhNMmBfFwXs1M3EMoAJtlyAthvFv...foz"

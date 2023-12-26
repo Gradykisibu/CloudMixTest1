@@ -1,9 +1,8 @@
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs ,doc, getDoc} from 'firebase/firestore';
 import { useAuthContext } from './components/context/AuthContext/AuthContext';
 
 const Utilities = () => {
   const { user } = useAuthContext();
-
   const getCurrentUserFromFirestore = async () => {
     const db = getFirestore();
 
@@ -28,8 +27,28 @@ const Utilities = () => {
     }
   };
 
+  const getAllUsersFromFirestore = async () => {
+    const db = getFirestore();
+
+    try {
+      const usersCollectionRef = collection(db, 'users');
+      const usersSnapshot = await getDocs(usersCollectionRef);
+
+      const users = [];
+      usersSnapshot.forEach((doc) => {
+        users.push({ id: doc.id, ...doc.data() });
+      });
+
+      return users;
+    } catch (error) {
+      console.error('Error fetching all users from Firestore:', error);
+      return null;
+    }
+  };
+
   return {
     getCurrentUserFromFirestore,
+    getAllUsersFromFirestore,
   };
 };
 
