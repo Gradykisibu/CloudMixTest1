@@ -5,6 +5,8 @@ import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getDoc } from "firebase/firestore";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useAuthContext } from "../../context/AuthContext/AuthContext";
+import EditIcon from '@mui/icons-material/Edit';
+
 
 const style = {
   position: "absolute",
@@ -93,7 +95,7 @@ export default function Biomodal(props) {
 
   return (
     <div>
-      <p onClick={handleOpen}>{"Create Bio"}</p>
+      <p onClick={handleOpen} style={{ cursor:"pointer",display:"flex", alignItems:"center", justifyContent:"space-between", width:"45px", color:"#777777"}}>{"Bio"} <EditIcon fontSize="small"/></p>
       <Modal
         open={open}
         aria-labelledby="modal-modal-title"

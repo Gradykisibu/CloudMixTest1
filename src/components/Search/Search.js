@@ -12,7 +12,9 @@ import { getAuth } from "firebase/auth";
 import { useAuthContext } from "../context/AuthContext/AuthContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Link } from "react-router-dom";
-import BasicAlerts from "../common/Alert/Alert";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { Triangle } from 'react-loader-spinner'
+
 
 function Search() {
   const { user } = useAuthContext();
@@ -23,15 +25,15 @@ function Search() {
   const db = getFirestore();
   const uid = auth?.currentUser?.uid;
   const [loadingMap, setLoadingMap] = useState({});
+  const [loader, setLoader ] = useState(false);
   const displayedUserId = user?.uid;
-  const noneUserProfile =
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBJFUrRW-9KIEVdN3T9pSjvHxHjMixAukVApkmZi6unkMDghw910z73svFS_qebhxKgG0&usqp=CAU";
-  const [ isShown, setIsShown ] = useState(false)
+  const [isShown, setIsShown] = useState(false);
   const handleChange = (e) => {
     setName(e.target.value);
   };
 
   const fetchAllUsers = async () => {
+    setLoader(true)
     const db = getFirestore();
     const usersCollection = collection(db, "users");
     try {
@@ -43,9 +45,12 @@ function Search() {
       }));
 
       setAllUsers(allUsersData);
+      setLoader(false)
     } catch (error) {
       console.error("Error fetching all users:", error);
+      setLoader(false)
     }
+    setLoader(false)
   };
 
   useEffect(() => {
@@ -144,13 +149,12 @@ function Search() {
     }
   };
 
-  
+
   return (
     <Box sx={searchMainContainer}>
-      <BasicAlerts/>
       <Box
         sx={{
-          marginTop: "100px",
+          // marginTop: "50px",
           width: "90%",
           height: "60px",
           display: "flex",
@@ -169,7 +173,7 @@ function Search() {
             color: "white",
             borderRadius: "10px",
             paddingLeft: "6px",
-            border:"1px solid #1e1e1e",
+            border: "1px solid #1e1e1e",
           }}
         />
       </Box>
@@ -177,15 +181,18 @@ function Search() {
       <Box
         sx={{
           width: "100%",
+          height: "100vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           flexDirection: "column",
           marginTop: "30px",
-          height: "auto",
+          background: "#101010",
         }}
       >
-        {filteredUsers
+        {!loader ? (
+          <>
+           {filteredUsers
           .filter((filteredUser) => filteredUser.id !== user?.uid)
           .map((user) => (
             <Box
@@ -209,13 +216,19 @@ function Search() {
                 }}
               >
                 <Box sx={{ marginRight: "50px" }}>
-                  <img
-                    src={user?.image ? user.image : noneUserProfile}
-                    alt=""
-                    width={50}
-                    height={50}
-                    style={{ borderRadius: "50%" }}
-                  />
+                  {user?.image && (
+                    <img
+                      src={user?.image}
+                      alt=""
+                      width={50}
+                      height={50}
+                      style={{ borderRadius: "50%" }}
+                    />
+                  )}
+
+                  {!user?.image && (
+                    <AccountCircleIcon sx={{ width: "50px", height: "50px" }} />
+                  )}
                 </Box>
                 <Box
                   sx={{
@@ -223,13 +236,24 @@ function Search() {
                     color: "white",
                     width: "200px",
                   }}
-                  
                 >
-                <Link to={"/user/" + user?.id} style={{ textDecoration: isShown[user.id] ? 'underline' : "none", color:"white"}} onMouseEnter={() => setIsShown((prev) => ({...prev, [user.id]:true}))}  onMouseLeave={() => setIsShown((prev) => ({...prev, [user.id]:false}))}>
-                  <p style={{ textTransform: "uppercase", fontSize: "13px" }}>
-                    {user?.name}
-                  </p>
-                </Link>
+                  <Link
+                    to={"/user/" + user?.id}
+                    style={{
+                      textDecoration: isShown[user.id] ? "underline" : "none",
+                      color: "white",
+                    }}
+                    onMouseEnter={() =>
+                      setIsShown((prev) => ({ ...prev, [user.id]: true }))
+                    }
+                    onMouseLeave={() =>
+                      setIsShown((prev) => ({ ...prev, [user.id]: false }))
+                    }
+                  >
+                    <p style={{ textTransform: "uppercase", fontSize: "13px" }}>
+                      {user?.name}
+                    </p>
+                  </Link>
                   <p style={{ color: "#777777", fontSize: "11px" }}>
                     @{user?.initial}
                   </p>
@@ -284,6 +308,23 @@ function Search() {
               </Box>
             </Box>
           ))}
+          </>
+
+        )
+        :
+        (
+          <Triangle
+          visible={true}
+          height="80"
+          width="80"
+          color="#4fa94d"
+          ariaLabel="triangle-loading"
+          wrapperStyle={{}}
+          wrapperClass=""
+          />
+        )
+      }
+       
       </Box>
     </Box>
   );
@@ -302,10 +343,12 @@ const button = {
 };
 
 const searchMainContainer = {
+  // justifyContent: "center",
+  // height: "100vh",
   width: "100%",
-  height: "100%",
   display: "flex",
   alignItems: "center",
   flexDirection: "column",
   background: "#101010",
+  marginTop: "120px",
 };

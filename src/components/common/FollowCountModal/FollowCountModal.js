@@ -29,7 +29,9 @@ export default function FollowCountModal(props) {
   
   const filteredUsers = props.getUsers.filter(
     (getUser) => getUser.id !== user.uid && !followedUsers.includes(getUser.id)
-  );
+  ); 
+
+  console.log('filteredUsers:', filteredUsers)
 
   return (
     <div>

@@ -1,4 +1,4 @@
-import React, { useState }  from "react";
+import React, { useState } from "react";
 import styles from "./profileScreen.module.css";
 import Box from "@mui/material/Box";
 import { styled } from "@mui/material/styles";
@@ -9,8 +9,9 @@ import BasicModal from "../common/Modal/Modal";
 import BasicTabs from "../common/Tabs/Tabs";
 import { useAuthContext } from "../context/AuthContext/AuthContext";
 import Stack from "@mui/material/Stack";
-import FollowCountModal from "./../common/FollowCountModal/FollowCountModal"
+import FollowCountModal from "./../common/FollowCountModal/FollowCountModal";
 import Utilities from "../../utilities";
+import { Triangle } from 'react-loader-spinner'
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -42,27 +43,49 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 }));
 
 function ProfileScreen() {
-  const { user } = useAuthContext();
-  const [ underline, setUnderline ] = useState(false);
+  const { user, loader } = useAuthContext();
+  const [underline, setUnderline] = useState(false);
   const { getAllUsersFromFirestore } = Utilities();
-  const [ getUsers, setGetUsers ] = useState([])
+  const [getUsers, setGetUsers] = useState([]);
+  console.log('LOADERRRR', loader)
 
-    const fetchAllUsers = async () => {
-      try {
-        const allUsers = await getAllUsersFromFirestore();
-        console.log('All users:', allUsers);
-        setGetUsers(allUsers)
-      } catch (error) {
-        console.error('Error fetching all users:', error);
-      }
-    };
+  const fetchAllUsers = async () => {
+    // setLoader(true)
+    try {
+    // setLoader(true)
+      const allUsers = await getAllUsersFromFirestore();
+      // console.log("All users:", allUsers);
+      setGetUsers(allUsers);
+      // setLoader(false)
+    } catch (error) {
+      // setLoader(false)
+      console.error("Error fetching all users:", error);
+    }
+  };
+
 
   return (
-    <>
-      <Box className={styles.profileMainContainer}>
+    <Box sx={{ background:"#101010"}}>
+    {
+      loader ? (
+        <Box sx={{width:"100%", height:"100vh", display:"flex",alignItems:"center",justifyContent:"center"}}>
+          <Triangle
+          visible={true}
+          height="80"
+          width="80"
+          color="#4fa94d"
+          ariaLabel="triangle-loading"
+          wrapperStyle={{}}
+          wrapperClass=""
+          />
+        </Box>
+      ) 
+      :
+      (
+        <Box className={styles.profileMainContainer}>
         <Box className={styles.titles}>
           <Box className={styles.userName}>
-            <h3 style={{ marginBottom: "-10px" }}>{user?.name}</h3>
+            <h3 style={{ marginBottom: "-10px" }}>{loader ? "loading" : <> {user?.name} </>}</h3>
             <Box
               sx={{
                 display: "flex",
@@ -114,15 +137,41 @@ function ProfileScreen() {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              width: "110px",
+              width: "120px",
             }}
           >
             <GroupsIcon fontSize="medium" />
-            <p style={{ fontSize: "11px", color: "#777777", cursor:"pointer" , textDecoration:!underline ? "none" : "underline", display:"flex", alignItems:"center", justifyContent:"center"}} onMouseEnter={() =>  setUnderline(true)} onMouseLeave={() => setUnderline(false)} onClick={fetchAllUsers}>
-              <span style={{marginRight:"5px"}}>{user?.followedUsers?.length <= 0 ? 0 : user?.followedUsers?.length }</span>
-              {user?.followedUsers?.length === 1 ? <FollowCountModal Follow='Follower' getUsers={getUsers} /> : <FollowCountModal Follow='Followers' getUsers={getUsers}/>}
+            <p
+              style={{
+                fontSize: "11px",
+                color: "#777777",
+                cursor: "pointer",
+                textDecoration: !underline ? "none" : "underline",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width:"90px",
+                background:"#1e1e1e",
+                height:"20px",
+                borderRadius:"15px"
+              }}
+              onMouseEnter={() => setUnderline(true)}
+              onMouseLeave={() => setUnderline(false)}
+              onClick={fetchAllUsers}
+            >
+              <span style={{ marginRight: "5px" }}>
+                {user?.followedUsers?.length <= 0
+                  ? 0
+                  : user?.followedUsers?.length}
+              </span>
+              {user?.followedUsers?.length === 1 ? (
+                <FollowCountModal Follow="Follower" getUsers={getUsers} />
+              ) : (
+                <FollowCountModal Follow="Followers" getUsers={getUsers} />
+              )}
             </p>
           </Box>
+          
 
           <Box>
             <img
@@ -137,8 +186,11 @@ function ProfileScreen() {
         <Box>
           <BasicTabs />
         </Box>
-      </Box>
-    </>
+      </Box> 
+      )
+    }
+     
+    </Box>
   );
 }
 

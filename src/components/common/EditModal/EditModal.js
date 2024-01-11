@@ -5,6 +5,7 @@ import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { useAuthContext } from "../../context/AuthContext/AuthContext";
 import CircularProgress from "@mui/material/CircularProgress";
+import EditIcon from '@mui/icons-material/Edit';
 
 const style = {
   position: "absolute",
@@ -108,9 +109,9 @@ export default function EditModal(props) {
 
   return (
     <div>
-      <p onClick={handleOpen}>
+      <p onClick={handleOpen} style={{ cursor:"pointer",display:"flex", alignItems:"center", justifyContent:"space-between", width:"45px", color:"#777777"}}>
         {" "}
-        {user?.initial ? user.initial : "Insert Initial"}
+        {user?.initial ? user.initial : "Insert Initial"} <EditIcon fontSize="small"/>
       </p>
       <Modal
         open={open}

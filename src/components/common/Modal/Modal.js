@@ -6,8 +6,7 @@ import EditModal from "../EditModal/EditModal";
 import Biomodal from "../BioModal/Biomodal";
 import { useAuthContext } from "../../context/AuthContext/AuthContext";
 import ImageModal from "../ImageModal/ImageModal";
-
-// import EditIcon from '@mui/icons-material/Edit';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const style = {
   position: "absolute",
@@ -20,7 +19,7 @@ const style = {
   p: 4,
   color: "#F3F5F7",
   borderRadius: "10px",
-  height: "430px",
+  height: "470px",
 };
 
 export default function BasicModal(props) {
@@ -37,20 +36,8 @@ export default function BasicModal(props) {
   const handleClose = () => setOpen(false);
 
   const handleFetchUser = () => {
-    // props.fetchUser();
     handleClose();
   }
-console.log(user, "user")
-  const color =
-    name.length <= 3
-      ? "#777777"
-      : name.length <= 6
-      ? "orange"
-      : name.length <= 9
-      ? "yellow"
-      : name.length <= 12
-      ? "green"
-      : "red";
 
   return (
     <div>
@@ -59,11 +46,13 @@ console.log(user, "user")
       </p>
       <Modal
         open={open}
-        onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
+          <Box sx={{width:"98%",display:"flex", alignItems:"center", justifyContent:"flex-end"}}>
+            <CancelIcon sx={{cursor:"pointer"}} onClick={handleClose}/>
+          </Box>
           <Box>
             <Box
               sx={{
@@ -92,7 +81,7 @@ console.log(user, "user")
                 }}
               >
                 {user?.name ? user.name : "No name"}{" "}
-                <span style={{ color: color, marginLeft: "10px" }}>
+                <span style={{ marginLeft: "10px" }}>
                   <EditModal
                     name={"Edit Name"}
                     stateName={name}
@@ -193,7 +182,7 @@ console.log(user, "user")
 }
 
 const UserDescription = {
-  width: "45%",
+  width: "100%",
   height: "auto",
   display: "flex",
   justifyContent: "flex-start",
