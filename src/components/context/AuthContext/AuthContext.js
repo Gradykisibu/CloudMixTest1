@@ -1,8 +1,13 @@
-import React, { useEffect, createContext, useContext, useState ,useCallback} from "react";
-import { auth, firestore } from "../../../Firebase/firebase"; // Fix the import
+import React, {
+  useEffect,
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+} from "react";
+import { auth, firestore } from "../../../Firebase/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-
 
 // Create our context with the imported createContext from React
 const AuthContext = createContext();
@@ -10,8 +15,9 @@ const AuthContext = createContext();
 // Create a provider for our context
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loader, setLoader] = useState(false);
   const [authenticatedUser, setAuthenticatedUser] = useState();
-  const nav = useNavigate()
+  const nav = useNavigate();
 
   useEffect(() => {
     // Subscribe to authentication state changes
@@ -24,17 +30,18 @@ export const AuthContextProvider = ({ children }) => {
       } else {
         // No user is signed in
         console.log("No user signed in.");
-        nav('/signup')
-        setUser(null); // Set the user state to null when no user is signed in
+        nav("/signup");
+        setUser(null);
       }
     });
 
-    // Cleanup the subscription when the component unmounts
+    // Cleanup the subscription when the component renders
     return () => unsubscribe();
   }, []);
 
   const getCurrentUserFromFirestore = useCallback(async () => {
-    // setLoading(true);
+    // setLoader(true);
+    console.log("getCurrentUserFromfirestore function")
     try {
       // Get the current user's UID
       const uid = auth.currentUser.uid;
@@ -56,7 +63,7 @@ export const AuthContextProvider = ({ children }) => {
       console.error("Error getting user data from Firestore:", error);
       throw error;
     }
-  }, []); 
+  }, []);
 
 
   const fetchData = useCallback(async () => {
@@ -65,22 +72,28 @@ export const AuthContextProvider = ({ children }) => {
       setUser(userData);
     } catch (error) {
       console.error("Error fetching user data:", error);
+    } finally {
     }
+    setLoader(false);
   }, [getCurrentUserFromFirestore, setUser]);
-
+  
   useEffect(() => {
+    setLoader(true);
+    console.log("useEffect ran")
     if (authenticatedUser) {
-      console.log(true);
       fetchData();
-    } else {
-      console.log(false);
+      setLoader(false);
     }
+    // setLoader(false);
   }, [authenticatedUser, fetchData]);
+  
 
   const payload = {
     user,
     setUser,
     fetchData,
+    loader,
+    setLoader,
   };
 
   return (

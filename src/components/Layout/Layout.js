@@ -13,11 +13,15 @@ function Layout({ children }) {
       {params.pathname === signup ||
       params.pathname === login ||
       params.pathname === forgot ? (
-        ""
+        <>
+       {children}
+        </>
       ) : (
+        <>
         <Navbar />
+       {children}
+        </>
       )}
-      {children}
     </div>
   );
 }

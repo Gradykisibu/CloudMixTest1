@@ -4,9 +4,9 @@ import HomeIcon from "@mui/icons-material/Home";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import SearchIcon from "@mui/icons-material/Search";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
-import EditNoteIcon from "@mui/icons-material/EditNote";
 import { useNavigate } from "react-router-dom";
 import DropDown from "../DropDown/DropDown";
+import PostFeed from "../common/PostFeedModal/Feed";
 
 
 function Navbar() {
@@ -33,6 +33,7 @@ function Navbar() {
         break;
     }
   };
+
 
   return (
     <Box sx={navbarContainer}>
@@ -61,7 +62,8 @@ function Navbar() {
         </Icon>
 
         <Icon iconName="edit" activeIcon={activeIcon} onClick={handleIconClick}>
-          <EditNoteIcon fontSize="large" />
+          {/* <EditNoteIcon fontSize="large" /> */}
+          <PostFeed/>
         </Icon>
         <Icon
           iconName="favorite"
@@ -110,7 +112,7 @@ const navbarContainer = {
   justifyContent: "space-between",
   background: "#101010",
   position: "fixed",
-  zIndex:"100"
+  zIndex:"1"
 };
 
 const logo = {

@@ -65,6 +65,7 @@ export default function ImageModal(props) {
   const storage = getStorage();
   const storageRef = ref(storage, `images/${user.uid}`);
   const [loading, setLoading] = React.useState(false);
+  
 
   const handleClose = () => {
     setOpen(false);
@@ -94,8 +95,6 @@ export default function ImageModal(props) {
     setLoading(true);
     try {
       const existingData = (await getDoc(userDocRef)).data();
-
-      // Update user data with the image URL
       await setDoc(userDocRef, {
         ...existingData,
         image: image,
