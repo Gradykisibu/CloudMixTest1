@@ -1,6 +1,7 @@
 import React from "react";
 import Navbar from "../Navbar/Navbar";
 import { useLocation } from "react-router-dom";
+import { Box } from "@mui/material";
 
 function Layout({ children }) {
   const params = useLocation();
@@ -18,8 +19,12 @@ function Layout({ children }) {
         </>
       ) : (
         <>
+        <Box sx={{width:"100%", height:"80px"}}>
         <Navbar />
-       {children}
+        </Box>
+        <Box sx={{width:"100%",}}>
+        {children}
+        </Box>
         </>
       )}
     </div>
