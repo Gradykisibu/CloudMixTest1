@@ -111,7 +111,7 @@ const navbarContainer = {
   alignItems: "center",
   justifyContent: "space-between",
   background: "#101010",
-  position: "fixed",
+  // position: "fixed",
   zIndex:"1"
 };
 
