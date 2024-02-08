@@ -22,6 +22,7 @@ function Home() {
     useFeedContext();
     const [inputText, setInputText] = useState("");
 
+
   useEffect(() => {
     const shuffleArray = (array) => {
       for (let i = array.length - 1; i > 0; i--) {
@@ -72,10 +73,26 @@ function Home() {
     fetchAllUsersFeeds();
   }, [isDataFetched, setFeeds, markDataAsFetched, getAllUsersFromFirestore]);
 
-  const handleSubmit = () => {
-    console.log(inputText)
-    setInputText("")
-  }
+  const handleInputChange = (itemId, value) => {
+    setInputText((prev) => ({
+      ...prev,
+      [itemId]: value,
+    }));
+  };
+
+  const handleSubmit = (itemId) => {
+    console.log(inputText[itemId]);
+    setInputText((prev) => ({
+      ...prev,
+      [itemId]: "",
+    }));
+  };
+
+
+  // const handleSubmit = () => {
+  //   console.log(inputText)
+  //   setInputText("")
+  // }
 
   return (
     <Box className={styles.homeMainContainer}>
@@ -148,7 +165,6 @@ function Home() {
                   key={item.id}
                   sx={{
                     marginTop: "20px",
-                    // mr: {sm: "0px", md:"50px",},
                     borderBottom: "1px solid #1e1e1e",
                     paddingBottom: "10px",
                   }}
@@ -295,11 +311,13 @@ function Home() {
                         borderRadius: "5px",
                         width: "400px",
                       }}
-                      value={inputText}
-                      onChange={(e) => setInputText(e.target.value)}
+                      // value={inputText}
+                      // onChange={(e) => setInputText(e.target.value)}
+                      value={inputText[item.id] || ""} 
+                      onChange={(e) => handleInputChange(item.id, e.target.value)}
                     />
                     <EmojiePoppover  inputText={inputText} setInputText={setInputText}/>
-                    <SendIcon sx={{ color: "white", cursor: "pointer" }}  onClick={handleSubmit}/>
+                    <SendIcon sx={{ color: "white", cursor: "pointer" }}  onClick={() => handleSubmit(item.id)}/>
                   </Box>
                 </Box>
               );

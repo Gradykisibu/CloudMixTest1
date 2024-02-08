@@ -44,10 +44,13 @@ export default function EmojiePoppover({ inputText, setInputText}) {
   };
 
   const handlePassEmojies = (item) => {
-    const updatedText = inputText + item.character;
-    setInputText(updatedText);
-    // handleClose();
+    console.log(item)
+    setInputText((prevInputText) => ({
+      ...prevInputText,
+      [item.id]: (prevInputText[item.id] || "") + item.character,
+    }));
   };
+  
 
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
@@ -114,6 +117,8 @@ export default function EmojiePoppover({ inputText, setInputText}) {
               </Box>
             ))}
         </Box>
+
+        <Box></Box>
       </Popover>
     </>
   );
