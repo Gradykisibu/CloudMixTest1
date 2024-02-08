@@ -62,6 +62,7 @@ const div2 = {
 export default function PostFeed() {
   const [open, setOpen] = React.useState(false);
   const [postText, setPostText] = useState("");
+  const [postSongName, setPostSongName] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [audioFile, setAudioFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -110,6 +111,7 @@ export default function PostFeed() {
       // Add a new document to the 'feeds' collection
       const docRef = await addDoc(feedsCollection, {
         text: postText,
+        songname: postSongName,
         image: imageUrl,
         audio: audioUrl,
         userId: user?.uid,
@@ -127,6 +129,7 @@ export default function PostFeed() {
 
       // Reset state values after posting
       setPostText("");
+      setPostSongName("")
       setImageFile(null);
       setAudioFile(null);
 
@@ -171,6 +174,21 @@ export default function PostFeed() {
               }}
             >
               <p style={{ color: "#777777" }}>@{user?.initial}</p>
+              <input
+                type="text"
+                value={postSongName}
+                onChange={(e) => setPostSongName(e.target.value)}
+                placeholder="Song name..."
+                style={{
+                  border: "1px solid #1e1e1e",
+                  background: "transparent",
+                  color: "grey",
+                  height: "30px",
+                  fontSize: "15px",
+                  borderRadius: "5px",
+                  marginBottom:"5px",
+                }}
+              />
               <input
                 type="text"
                 value={postText}

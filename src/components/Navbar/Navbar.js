@@ -7,11 +7,13 @@ import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { useNavigate } from "react-router-dom";
 import DropDown from "../DropDown/DropDown";
 import PostFeed from "../common/PostFeedModal/Feed";
-
+import TemporaryDrawer from "../common/MenuDrawer/MenuDrawer";
+import { useMediaQuery } from '@material-ui/core';
 
 function Navbar() {
   const [activeIcon, setActiveIcon] = useState("home");
-  
+
+  const isMdOrUp = useMediaQuery('(min-width: 600px)');
   const nav = useNavigate();
 
   const handleIconClick = (iconName) => {
@@ -38,7 +40,7 @@ function Navbar() {
   return (
     <Box sx={navbarContainer}>
 
-      <Box sx={logo}>
+      <Box style={logo} sx={{ ml: { xs:'20px' , md:'0px'}}}>
         <img
           src="https://www.logomaker.com/api/main/images/1j+ojFVDOMkX9Wytexe43D6kh...CCrhNMmBfFwXs1M3EMoAJtlyAthvFv...foz"
           alt="logo"
@@ -48,6 +50,7 @@ function Navbar() {
         />
       </Box>
 
+      <Box sx={{ display: { xs: 'none', md: 'block'}, width:"40%"}}>
       <Box sx={Icons}>
         <Icon iconName="home" activeIcon={activeIcon} onClick={handleIconClick}>
           <HomeIcon fontSize="large" n />
@@ -62,7 +65,6 @@ function Navbar() {
         </Icon>
 
         <Icon iconName="edit" activeIcon={activeIcon} onClick={handleIconClick}>
-          {/* <EditNoteIcon fontSize="large" /> */}
           <PostFeed/>
         </Icon>
         <Icon
@@ -81,11 +83,12 @@ function Navbar() {
         </Icon>
       </Box>
 
-      <Box sx={menu}>
-        <Icon iconName="menu" activeIcon={activeIcon} onClick={handleIconClick}>
-          <DropDown/>
-        </Icon>
       </Box>
+      <Box style={menu} sx={{ mr: { xs: '10px', md: '0px' } }}>
+      <Icon iconName="menu" activeIcon={activeIcon} onClick={handleIconClick}>
+        {isMdOrUp ? <DropDown /> : <TemporaryDrawer />}
+      </Icon>
+    </Box>
     </Box>
   );
 }
@@ -111,7 +114,6 @@ const navbarContainer = {
   alignItems: "center",
   justifyContent: "space-between",
   background: "#101010",
-  // position: "fixed",
   zIndex:"1"
 };
 
@@ -132,7 +134,7 @@ const menu = {
 };
 
 const Icons = {
-  width: "40%",
+  width: "100%",
   height: "70%",
   display: "flex",
   alignItems: "center",

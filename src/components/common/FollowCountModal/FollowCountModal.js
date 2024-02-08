@@ -21,6 +21,7 @@ const style = {
 };
 
 export default function FollowCountModal(props) {
+  
   const { user } = useAuthContext();
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);

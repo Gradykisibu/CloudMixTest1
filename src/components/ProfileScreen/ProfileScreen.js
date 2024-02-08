@@ -184,7 +184,7 @@ function ProfileScreen() {
         </Box>
         <BasicModal className={styles.EditBtn} />
         <Box>
-          <BasicTabs />
+          <BasicTabs user={user} />
         </Box>
       </Box> 
       )

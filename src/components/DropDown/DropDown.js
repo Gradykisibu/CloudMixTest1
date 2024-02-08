@@ -6,6 +6,7 @@ import { getAuth, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 
+
 export default function DropDown() {
   const nav = useNavigate()
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -49,8 +50,17 @@ export default function DropDown() {
             borderRadius:"20px" 
           },
         }}
-        style={{ marginLeft: "-20px", }}
+        sx={{ marginLeft: "-20px", }}
       >
+        <MenuItem sx={{color:"white", display:{sm:"block", md:"none"}}}>
+          Home
+        </MenuItem>
+        <MenuItem sx={{color:"white", display:{sm:"block", md:"none"}}}>
+          Search
+        </MenuItem>
+        <MenuItem sx={{color:"white", display:{sm:"block", md:"none"}}}>
+          Activity
+        </MenuItem>
         <MenuItem onClick={handleClose} style={{ color: "white" }}>
           Profile
         </MenuItem>
