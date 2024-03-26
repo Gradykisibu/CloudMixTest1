@@ -86,6 +86,10 @@ function Search() {
   }, [setLoader, markDataAsFetched, setAllUsers]);
 
   useEffect(() => {
+    fetchAllUsers()
+  },[])
+  
+  useEffect(() => {
     if (!dataFetched) {
       fetchAllUsers();
       setDataFetched(true);
@@ -226,10 +230,11 @@ function Search() {
         <Box
           sx={{
             width: "100%",
-            height: "60px",
+            // height: "60px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            flexDirection:"column",
           }}
         >
           <input
@@ -246,12 +251,11 @@ function Search() {
               border: "1px solid #1e1e1e",
             }}
           />
-        </Box>
 
         <Box
           sx={{
             width: "100%",
-            height: "100vh",
+            // height: "100vh",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -413,6 +417,8 @@ function Search() {
             />
           )}
         </Box>
+        </Box>
+
       </Box>
     </Box>
   );

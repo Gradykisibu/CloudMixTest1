@@ -2,76 +2,113 @@ import { Box } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import styles from "./home.module.css";
 import { getFirestore } from "firebase/firestore";
-import { getDocs, collection } from "firebase/firestore";
-import Utilities from "../../utilities";
+import {
+  doc,
+  updateDoc,
+  getDoc,
+} from "firebase/firestore";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
-import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import SendIcon from "@mui/icons-material/Send";
 import { Triangle } from "react-loader-spinner";
 import CustomAudioPlayer from "../CustomAudio/CustomAudioPlayer";
 import { useFeedContext } from "../context/FeedContext/FeedContext";
-import EmojiePoppover from "../common/EmojieModal/EmojiePoppover";
+import SimpleAlert from "../Alert/SimpleAlert";
+import { useAuthContext } from "../context/AuthContext/AuthContext";
+import CircularProgress from "@mui/material/CircularProgress";
+import ViewComment from "../common/ViewComment/ViewComment";
 
 function Home() {
-  const [getUsers, setGetUsers] = useState([]);
-  const { getAllUsersFromFirestore } = Utilities();
-  const [loader, setLoader] = useState(false);
-  const { setFeeds, feeds, markDataAsFetched, isDataFetched } =
-    useFeedContext();
-    const [inputText, setInputText] = useState("");
 
+  const [commmentLoader, setCommentLoader] = useState({});
+  const [deleteLoader, setDeleteLoader ] = useState({});
+  const { setFeeds, feeds, fetchAllUsers, fetchAllUsersFeeds, getUsers, loader, postedFeed} =
+    useFeedContext();
+  const { user } = useAuthContext();
+  const [inputText, setInputText] = useState("");
+  const [alert, setAlert] = useState({
+    open: false,
+    message: "",
+    duration: "",
+    type: "",
+  });
+
+ 
+
+//   const fetchAllUsersFeeds = async () => {
+//   setLoader(true);
+
+//   if (!isDataFetched) {
+//     try {
+//       // Check if data exists in localStorage
+//       const cachedFeeds = localStorage.getItem('feeds');
+//       if (cachedFeeds) {
+//         setFeeds(JSON.parse(cachedFeeds));
+//         markDataAsFetched();
+//         setLoader(false);
+//         return;
+//       }
+
+//       const db = getFirestore();
+//       const usersCollection = collection(db, "feeds");
+//       const usersSnapshot = await getDocs(usersCollection);
+//       const fetchedFeeds = usersSnapshot.docs.map((doc) => ({
+//         id: doc.id,
+//         ...doc.data(),
+//       }));
+
+//       const shuffledFeeds = shuffleArray(fetchedFeeds);
+//       setFeeds(shuffledFeeds);
+//       markDataAsFetched();
+      
+//       // Store fetched data in localStorage
+//       localStorage.setItem('feeds', JSON.stringify(shuffledFeeds));
+//     } catch (error) {
+//       console.error("Error fetching feeds:", error);
+//       setAlert({
+//         message: error.message,
+//         type: "error",
+//         duration: 5000,
+//         open: true,
+//       });
+//     } finally {
+//       setLoader(false);
+//     }
+//   } else {
+//     setLoader(false);
+//   }
+// };
+
+// const fetchAllUsers = async () => {
+//   try {
+//     // Check if data exists in localStorage
+//     const cachedUsers = localStorage.getItem('users');
+//     if (cachedUsers) {
+//       setGetUsers(JSON.parse(cachedUsers));
+//       return;
+//     }
+
+//     const allUsers = await getAllUsersFromFirestore();
+//     setGetUsers(allUsers);
+    
+//     // Store fetched data in localStorage
+//     localStorage.setItem('users', JSON.stringify(allUsers));
+//   } catch (error) {
+//     console.error("Error fetching all users:", error);
+//     setAlert({
+//       message: error.message,
+//       type: "error",
+//       duration: 5000,
+//       open: true,
+//     });
+//   }
+// };
 
   useEffect(() => {
-    const shuffleArray = (array) => {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    };
-
-    const fetchAllUsersFeeds = async () => {
-      setLoader(true);
-
-      if (!isDataFetched) {
-        const db = getFirestore();
-        const usersCollection = collection(db, "feeds");
-
-        try {
-          const usersSnapshot = await getDocs(usersCollection);
-          const fetchedFeeds = usersSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-
-          const shuffledFeeds = shuffleArray(fetchedFeeds);
-
-          setFeeds(shuffledFeeds);
-          markDataAsFetched();
-        } catch (error) {
-          console.error("Error fetching feeds:", error);
-        } finally {
-          setLoader(false);
-        }
-      } else {
-        setLoader(false);
-      }
-    };
-
-    const fetchAllUsers = async () => {
-      try {
-        const allUsers = await getAllUsersFromFirestore();
-        setGetUsers(allUsers);
-      } catch (error) {
-        console.error("Error fetching all users:", error);
-      }
-    };
-
-    fetchAllUsers();
-    fetchAllUsersFeeds();
-  }, [isDataFetched, setFeeds, markDataAsFetched, getAllUsersFromFirestore]);
+    fetchAllUsers({ setAlert});
+    fetchAllUsersFeeds({ setAlert});
+  }, [postedFeed]);
 
   const handleInputChange = (itemId, value) => {
     setInputText((prev) => ({
@@ -80,22 +117,209 @@ function Home() {
     }));
   };
 
-  const handleSubmit = (itemId) => {
-    console.log(inputText[itemId]);
-    setInputText((prev) => ({
-      ...prev,
-      [itemId]: "",
-    }));
+  const handleSubmitComment = async (itemId, user) => {
+    setCommentLoader((prev) => ({ ...prev, [itemId]: true }));
+    try {
+      const db = getFirestore();
+      const postRef = doc(db, "feeds", itemId);
+      const postDoc = await getDoc(postRef);
+
+      if (postDoc.exists()) {
+        const currentComments = postDoc.data().comments || [];
+        const newComment = {
+          text: inputText[itemId],
+          userName: user.name,
+          userId: user.uid,
+          userImage: user.image,
+          id: itemId,
+        };
+        const updatedComments = [...currentComments, newComment];
+
+        await updateDoc(postRef, { comments: updatedComments });
+
+        setFeeds((prevFeeds) => {
+          const updatedFeeds = prevFeeds.map((feed) => {
+            if (feed.id === itemId) {
+              return { ...feed, comments: updatedComments };
+            }
+            return feed;
+          });
+          return updatedFeeds;
+        });
+        setCommentLoader(false);
+        setAlert({
+          message: "Comment has been added",
+          type: "success",
+          duration: 5000,
+          open: true,
+        });
+      } else {
+        setCommentLoader((prev) => ({ ...prev, [itemId]: false }));
+        setAlert({
+          message: `Comment with ID ${itemId} does not exist`,
+          type: "warning",
+          duration: 5000,
+          open: true,
+        });
+      }
+
+      setInputText((prev) => ({
+        ...prev,
+        [itemId]: "",
+      }));
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      setCommentLoader((prev) => ({ ...prev, [itemId]: false }));
+
+      setAlert({
+        message: "Error could not add comment",
+        type: "error",
+        duration: 5000,
+        open: true,
+      });
+    }
+    setCommentLoader((prev) => ({ ...prev, [itemId]: false }));
   };
 
+  const handleDeleteComment = async (itemId, commentIndex) => {
+    setDeleteLoader((prev) => ({ ...prev, [commentIndex]: true }));
+    try {
+      const db = getFirestore();
+      const postRef = doc(db, "feeds", itemId);
+      const postDoc = await getDoc(postRef);
+  
+      if (postDoc.exists()) {
+        const currentComments = postDoc.data().comments || [];
+        const updatedComments = [...currentComments];
+        updatedComments.splice(commentIndex, 1); // Remove the comment at the specified index
+  
+        await updateDoc(postRef, { comments: updatedComments });
+  
+        setFeeds((prevFeeds) => {
+          const updatedFeeds = prevFeeds.map((feed) => {
+            if (feed.id === itemId) {
+              return { ...feed, comments: updatedComments };
+            }
+            return feed;
+          });
+          return updatedFeeds;
+        });
+        setDeleteLoader((prev) => ({ ...prev, [commentIndex]: false }));
+        setAlert({
+          message: "Comment has been deleted",
+          type: "success",
+          duration: 5000,
+          open: true,
+        });
+      } else {
+        setDeleteLoader((prev) => ({ ...prev, [commentIndex]: false }));
+        setAlert({
+          message: `Feed with ID ${itemId} does not exist`,
+          type: "warning",
+          duration: 5000,
+          open: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      setDeleteLoader((prev) => ({ ...prev, [commentIndex]: false }));
+  
+      setAlert({
+        message: "Error could not delete comment",
+        type: "error",
+        duration: 5000,
+        open: true,
+      });
+    }
+  };
+  
 
-  // const handleSubmit = () => {
-  //   console.log(inputText)
-  //   setInputText("")
-  // }
+  const handleLikePost = async (postId, user) => {
+    try {
+      const db = getFirestore();
+      const postRef = doc(db, "feeds", postId);
+      const postDoc = await getDoc(postRef);
+
+      if (postDoc.exists()) {
+        const currentLikes = postDoc.data().likes || [];
+        const userLikedIndex = currentLikes.indexOf(user?.uid);
+
+        if (userLikedIndex === -1) {
+          const updatedLikes = [...currentLikes, user?.uid];
+          await updateDoc(postRef, { likes: updatedLikes });
+
+          setFeeds((prevFeeds) => {
+            const updatedFeeds = prevFeeds.map((feed) => {
+              if (feed.id === postId) {
+                return { ...feed, likes: updatedLikes };
+              }
+              return feed;
+            });
+            return updatedFeeds;
+          });
+
+          setAlert({
+            message: "Post has been liked",
+            type: "success",
+            duration: 5000,
+            open: true,
+          });
+        } else {
+          const updatedLikes = currentLikes.filter(
+            (_, index) => index !== userLikedIndex
+          );
+          await updateDoc(postRef, { likes: updatedLikes });
+
+          setFeeds((prevFeeds) => {
+            const updatedFeeds = prevFeeds.map((feed) => {
+              if (feed.id === postId) {
+                return { ...feed, likes: updatedLikes };
+              }
+              return feed;
+            });
+            return updatedFeeds;
+          });
+
+          setAlert({
+            message: "You unliked the post",
+            type: "success",
+            duration: 5000,
+            open: true,
+          });
+        }
+      } else {
+        console.log(`Post with ID ${postId} does not exist`);
+        setAlert({
+          message: `Post with ID ${postId} does not exist`,
+          type: "warning",
+          duration: 5000,
+          open: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error liking post:", error);
+      setAlert({
+        message: "Error could not like post",
+        type: "error",
+        duration: 5000,
+        open: true,
+      });
+    }
+  };
 
   return (
     <Box className={styles.homeMainContainer}>
+      <SimpleAlert
+        close={() =>
+          setAlert({
+            message: "",
+            type: "",
+            duration: "",
+            open: false,
+          })
+        }
+        {...alert}
+      />
       <Box
         sx={{
           width: "100%",
@@ -157,12 +381,13 @@ function Home() {
               const matchingUser = getUsers.find((user) =>
                 user.userFeed?.includes(item.id)
               );
-              const timestamp = item?.timestamp?.toDate();
-              const formattedDate = timestamp?.toLocaleDateString();
+              // const timestamp = item?.timestamp?.toDate();
+              // const formattedDate = timestamp?.toLocaleDateString();
 
               return (
                 <Box
                   key={item.id}
+                  item={item}
                   sx={{
                     marginTop: "20px",
                     borderBottom: "1px solid #1e1e1e",
@@ -196,7 +421,7 @@ function Home() {
                     >
                       @{matchingUser?.initial || "Unknown User"} .{" "}
                       <span style={{ fontSize: "9px", color: "#777777" }}>
-                        {formattedDate}
+                        {/* {formattedDate} */}
                       </span>{" "}
                     </p>
                   </Box>
@@ -273,23 +498,30 @@ function Home() {
                     )}
                   </Box>
 
-                  <Box sx={{ mt: "5px" }}>
+                  <Box
+                    sx={{
+                      mt: "5px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-start",
+                    }}
+                  >
+                    <Box sx={{ color: "white", fontSize: "15px", mr: "3px" }}>
+                      {item.likes ? <p>{item.likes.length}</p> : <p>0</p>}
+                    </Box>
                     <FavoriteBorderOutlinedIcon
                       fontSize="medium"
-                      sx={{ color: "white", cursor: "pointer" }}
-                    />
-                    <ChatBubbleOutlineOutlinedIcon
-                      fontSize="medium"
                       sx={{
-                        marginLeft: "5px",
-                        color: "white",
+                        color:
+                          item.likes && item.likes.includes(user?.uid)
+                            ? "red"
+                            : "grey",
                         cursor: "pointer",
+                        mr: "3px",
                       }}
+                      onClick={() => handleLikePost(item.id, user)}
                     />
-                  </Box>
-
-                  <Box sx={{ color: "white", fontSize: "10px" }}>
-                    <p>0 Likes</p>
+                    <ViewComment comments={item.comments} image={item.image} handleDeleteComment={handleDeleteComment} loader={deleteLoader}/>
                   </Box>
 
                   <Box
@@ -301,7 +533,7 @@ function Home() {
                   >
                     <input
                       type="text"
-                      placeholder="Add a comment..."
+                      placeholder="comment..."
                       style={{
                         border: "none",
                         background: "transparent",
@@ -311,13 +543,20 @@ function Home() {
                         borderRadius: "5px",
                         width: "400px",
                       }}
-                      // value={inputText}
-                      // onChange={(e) => setInputText(e.target.value)}
-                      value={inputText[item.id] || ""} 
-                      onChange={(e) => handleInputChange(item.id, e.target.value)}
+                      value={inputText[item.id] || ""}
+                      onChange={(e) =>
+                        handleInputChange(item.id, e.target.value)
+                      }
                     />
-                    <EmojiePoppover  inputText={inputText} setInputText={setInputText}/>
-                    <SendIcon sx={{ color: "white", cursor: "pointer" }}  onClick={() => handleSubmit(item.id)}/>
+
+                    {commmentLoader[item.id] ? (
+                      <CircularProgress size={20} style={{ color: "grey" }} />
+                    ) : (
+                      <SendIcon
+                        sx={{ color: "grey", cursor: "pointer" }}
+                        onClick={() => handleSubmitComment(item.id, user)}
+                      />
+                    )}
                   </Box>
                 </Box>
               );

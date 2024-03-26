@@ -8,12 +8,12 @@ import { useNavigate } from "react-router-dom";
 import DropDown from "../DropDown/DropDown";
 import PostFeed from "../common/PostFeedModal/Feed";
 import TemporaryDrawer from "../common/MenuDrawer/MenuDrawer";
-import { useMediaQuery } from '@material-ui/core';
+import { useMediaQuery } from "@material-ui/core";
 
 function Navbar() {
   const [activeIcon, setActiveIcon] = useState("home");
 
-  const isMdOrUp = useMediaQuery('(min-width: 600px)');
+  const isMdOrUp = useMediaQuery("(min-width: 600px)");
   const nav = useNavigate();
 
   const handleIconClick = (iconName) => {
@@ -36,59 +36,64 @@ function Navbar() {
     }
   };
 
-
   return (
     <Box sx={navbarContainer}>
-
-      <Box style={logo} sx={{ ml: { xs:'20px' , md:'0px'}}}>
+      <Box style={logo} sx={{ ml: { xs: "20px", md: "0px" } }}>
         <img
           src="https://www.logomaker.com/api/main/images/1j+ojFVDOMkX9Wytexe43D6kh...CCrhNMmBfFwXs1M3EMoAJtlyAthvFv...foz"
           alt="logo"
           width={60}
           height={40}
-          onClick={() => nav('/')}
+          onClick={() => nav("/")}
         />
       </Box>
 
-      <Box sx={{ display: { xs: 'none', md: 'block'}, width:"40%"}}>
-      <Box sx={Icons}>
-        <Icon iconName="home" activeIcon={activeIcon} onClick={handleIconClick}>
-          <HomeIcon fontSize="large" n />
-        </Icon>
+      <Box sx={{ display: { xs: "none", md: "block" }, width: "40%" }}>
+        <Box sx={Icons}>
+          <Icon
+            iconName="home"
+            activeIcon={activeIcon}
+            onClick={handleIconClick}
+          >
+            <HomeIcon fontSize="large" />
+          </Icon>
 
-        <Icon
-          iconName="search"
-          activeIcon={activeIcon}
-          onClick={handleIconClick}
-        >
-          <SearchIcon fontSize="large" />
-        </Icon>
+          <Icon
+            iconName="search"
+            activeIcon={activeIcon}
+            onClick={handleIconClick}
+          >
+            <SearchIcon fontSize="large" />
+          </Icon>
 
-        <Icon iconName="edit" activeIcon={activeIcon} onClick={handleIconClick}>
-          <PostFeed/>
-        </Icon>
-        <Icon
-          iconName="favorite"
-          activeIcon={activeIcon}
-          onClick={handleIconClick}
-        >
-          <FavoriteIcon fontSize="large" />
-        </Icon>
-        <Icon
-          iconName="person"
-          activeIcon={activeIcon}
-          onClick={handleIconClick}
-        >
-          <PersonOutlineIcon fontSize="large" />
+          <Icon
+            iconName="edit"
+            activeIcon={activeIcon}
+            onClick={handleIconClick}
+          >
+            <PostFeed />
+          </Icon>
+          <Icon
+            iconName="favorite"
+            activeIcon={activeIcon}
+            onClick={handleIconClick}
+          >
+            <FavoriteIcon fontSize="large" />
+          </Icon>
+          <Icon
+            iconName="person"
+            activeIcon={activeIcon}
+            onClick={handleIconClick}
+          >
+            <PersonOutlineIcon fontSize="large" />
+          </Icon>
+        </Box>
+      </Box>
+      <Box style={menu} sx={{ mr: { xs: "10px", md: "0px" } }}>
+        <Icon iconName="menu" activeIcon={activeIcon} onClick={handleIconClick}>
+          {isMdOrUp ? <DropDown /> : <TemporaryDrawer />}
         </Icon>
       </Box>
-
-      </Box>
-      <Box style={menu} sx={{ mr: { xs: '10px', md: '0px' } }}>
-      <Icon iconName="menu" activeIcon={activeIcon} onClick={handleIconClick}>
-        {isMdOrUp ? <DropDown /> : <TemporaryDrawer />}
-      </Icon>
-    </Box>
     </Box>
   );
 }
@@ -114,7 +119,7 @@ const navbarContainer = {
   alignItems: "center",
   justifyContent: "space-between",
   background: "#101010",
-  zIndex:"1"
+  zIndex: "1",
 };
 
 const logo = {
@@ -122,7 +127,7 @@ const logo = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  cursor:"pointer",
+  cursor: "pointer",
 };
 
 const menu = {

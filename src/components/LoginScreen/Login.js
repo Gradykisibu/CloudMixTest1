@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import CircularProgress from "@mui/material/CircularProgress";
+import SimpleAlert from "../Alert/SimpleAlert";
 
 function Login() {
   const nav = useNavigate();
@@ -12,8 +13,12 @@ function Login() {
     email: "",
     password: "",
   });
-
-  // const [notAllowed, setNotAllowed] = useState(false);
+  const [alert, setAlert] = useState({
+    open: false,
+    message: "",
+    duration: "",
+    type: "",
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,12 +27,6 @@ function Login() {
       ...prevUser,
       [name]: value,
     }));
-
-    // if (user.email.length > 0 && user.password.length > 0) {
-    //   setNotAllowed(true);
-    // } else {
-    //   setNotAllowed(false);
-    // }
   };
 
   const handleSubmit = (e) => {
@@ -38,14 +37,17 @@ function Login() {
       .then((userCredential) => {
         const LoggedUser = userCredential.user;
         nav("/");
-        setLoading(false);
+        setLoading(false);      
         console.log(LoggedUser);
       })
       .catch((error) => {
-        const errorCode = error.code;
-        console.log(errorCode);
-        const errorMessage = error.message;
-        console.log(errorMessage);
+        setLoading(false);
+        setAlert({
+          message: error.message,
+          type: "error",
+          duration: 5000,
+          open: true,
+        });
       });
   };
 
@@ -58,7 +60,7 @@ function Login() {
     height: "45px",
     borderRadius: "10px",
     border: "none",
-    cursor:"pointer",
+    cursor: "pointer",
     color: "#777777",
     background: "#1e1e1e",
     fontsFamily: "sans-seriff",
@@ -67,6 +69,17 @@ function Login() {
 
   return (
     <Box sx={SignupContainer}>
+      <SimpleAlert
+        close={() =>
+          setAlert({
+            message: "",
+            type: "",
+            duration: "",
+            open: false,
+          })
+        }
+        {...alert}
+      />
       <Box>
         <img
           src="https://www.logomaker.com/api/main/images/1j+ojFVDOMkX9Wytexe43D6kh...CCrhNMmBfFwXs1M3EMoAJtlyAthvFv...foz"

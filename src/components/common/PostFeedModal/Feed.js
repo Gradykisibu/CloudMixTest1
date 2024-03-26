@@ -23,6 +23,7 @@ import {
 import { doc, updateDoc, arrayUnion } from "firebase/firestore";
 import IconButton from "@mui/material/IconButton";
 import Input from "@mui/material/Input";
+import { useFeedContext } from "../../context/FeedContext/FeedContext";
 
 const style = {
   position: "absolute",
@@ -30,7 +31,7 @@ const style = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: 550,
-  height: 200,
+  height: 250,
   background: "rgba(16, 16, 16, 0.9)",
   boxShadow: "0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23)",
   p: 4,
@@ -40,6 +41,7 @@ const style = {
   justifyContent: "space-evenly",
   flexDirection: "column",
   borderRadius: "10px",
+  border: "1px solid #1e1e1e",
 };
 
 const div1 = {
@@ -67,7 +69,14 @@ export default function PostFeed() {
   const [audioFile, setAudioFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const { user } = useAuthContext();
-  const handleOpen = () => setOpen(true);
+  const { setPostedFeed ,fetchAllUsersFeeds, fetchAllUsers,} = useFeedContext();
+  const handleOpen = () => {
+    setPostText(null);
+    setPostSongName(null);
+    setImageFile(null);
+    setAudioFile(null);
+    setOpen(true);
+  };
   const handleClose = () => setOpen(false);
   const firestore = getFirestore();
 
@@ -84,7 +93,7 @@ export default function PostFeed() {
   const handlePost = async () => {
     setLoading(true);
     const feedsCollection = collection(firestore, "feeds");
-
+  
     try {
       // Upload image file to Firebase Storage
       let imageUrl = "";
@@ -96,7 +105,7 @@ export default function PostFeed() {
         await uploadBytes(imageStorageRef, imageFile);
         imageUrl = await getDownloadURL(imageStorageRef);
       }
-
+  
       // Upload audio file to Firebase Storage
       let audioUrl = "";
       if (audioFile) {
@@ -107,7 +116,7 @@ export default function PostFeed() {
         await uploadBytes(audioStorageRef, audioFile);
         audioUrl = await getDownloadURL(audioStorageRef);
       }
-
+  
       // Add a new document to the 'feeds' collection
       const docRef = await addDoc(feedsCollection, {
         text: postText,
@@ -117,23 +126,27 @@ export default function PostFeed() {
         userId: user?.uid,
         timestamp: serverTimestamp(),
       });
-
+  
       // Update user object with the new post in the 'userFeed' array
       const userDocRef = doc(firestore, "users", user?.uid);
       await updateDoc(userDocRef, {
         userFeed: arrayUnion(docRef.id),
       });
-
+  
       // Document added successfully
       console.log("Post added with ID: ", docRef.id);
-
+      fetchAllUsers();
+      fetchAllUsersFeeds();
+      setPostedFeed(true);
+  
       // Reset state values after posting
       setPostText("");
-      setPostSongName("")
+      setPostSongName("");
       setImageFile(null);
       setAudioFile(null);
-
+  
       // Close the modal
+      setPostedFeed(false);
       handleClose();
     } catch (error) {
       console.error("Error adding post: ", error);
@@ -141,7 +154,7 @@ export default function PostFeed() {
     }
     setLoading(false);
   };
-
+  
   return (
     <div>
       <Box onClick={handleOpen}>
@@ -155,89 +168,138 @@ export default function PostFeed() {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <Box sx={div1}>
-            <Stack direction="row" spacing={2}>
-              <Avatar
-                alt="Remy Sharp"
-                src={user?.image}
-                width={300}
-                height={300}
-              />
-            </Stack>
+          <Box
+            sx={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Box sx={{ width: "50%" }}>
+              <Box sx={div1}>
+                <Stack direction="row" spacing={2}>
+                  <Avatar
+                    alt="Remy Sharp"
+                    src={user?.image}
+                    width={300}
+                    height={300}
+                  />
+                </Stack>
 
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "flex-start",
-                flexDirection: "column",
-                paddingLeft: "10px",
-              }}
-            >
-              <p style={{ color: "#777777" }}>@{user?.initial}</p>
-              <input
-                type="text"
-                value={postSongName}
-                onChange={(e) => setPostSongName(e.target.value)}
-                placeholder="Song name..."
-                style={{
-                  border: "1px solid #1e1e1e",
-                  background: "transparent",
-                  color: "grey",
-                  height: "30px",
-                  fontSize: "15px",
-                  borderRadius: "5px",
-                  marginBottom:"5px",
-                }}
-              />
-              <input
-                type="text"
-                value={postText}
-                onChange={(e) => setPostText(e.target.value)}
-                placeholder="Start a feed..."
-                style={{
-                  border: "1px solid #1e1e1e",
-                  background: "transparent",
-                  color: "grey",
-                  height: "30px",
-                  fontSize: "15px",
-                  borderRadius: "5px",
-                }}
-              />
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-start",
+                    flexDirection: "column",
+                    paddingLeft: "10px",
+                  }}
+                >
+                  <p style={{ color: "#777777" }}>@{user?.initial}</p>
+                  <input
+                    type="text"
+                    value={postSongName}
+                    onChange={(e) => setPostSongName(e.target.value)}
+                    placeholder="Song name..."
+                    style={{
+                      border: "1px solid #1e1e1e",
+                      background: "transparent",
+                      color: "grey",
+                      height: "30px",
+                      fontSize: "15px",
+                      borderRadius: "5px",
+                      marginBottom: "5px",
+                    }}
+                  />
+                  <input
+                    type="text"
+                    value={postText}
+                    onChange={(e) => setPostText(e.target.value)}
+                    placeholder="Start a feed..."
+                    style={{
+                      border: "1px solid #1e1e1e",
+                      background: "transparent",
+                      color: "grey",
+                      height: "30px",
+                      fontSize: "15px",
+                      borderRadius: "5px",
+                    }}
+                  />
+                </Box>
+              </Box>
+
+              <Box sx={div2}>
+                <Box
+                  sx={{
+                    width: "150px",
+                    height: "30px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                  }}
+                >
+                  <IconButton component="label" sx={{ color: "#777777" }}>
+                    <MusicNoteIcon
+                      sx={{ color: audioFile?.name ? "green" : "grey" }}
+                    />
+                    <Input
+                      type="file"
+                      accept="audio/*"
+                      onChange={handleAudioChange}
+                      style={{ display: "none" }}
+                    />
+                  </IconButton>
+                  <IconButton component="label" sx={{ color: "#777777" }}>
+                    <ImageIcon
+                      sx={{ color: imageFile?.name ? "green" : "grey" }}
+                    />
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      style={{ display: "none" }}
+                    />
+                  </IconButton>
+                  <p>
+                    <TagIcon sx={{ color: "#777777", cursor: "pointer" }} />
+                  </p>
+                </Box>
+              </Box>
             </Box>
-          </Box>
 
-          <Box sx={div2}>
             <Box
               sx={{
-                width: "150px",
-                height: "30px",
+                width: "50%",
+                height: "100%",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "flex-start",
+                justifyContent: "center",
+                color: "green",
+                flexDirection: "column",
               }}
             >
-
-              <IconButton component="label" sx={{color:"#777777"}}>
-                <MusicNoteIcon />
-                <Input
-                  type="file"
-                  accept="audio/*"
-                  onChange={handleAudioChange}
-                  style={{ display: "none" }}
-                />
-              </IconButton>
-              <IconButton component="label" sx={{color:"#777777"}}>
-                <ImageIcon />
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  style={{ display: "none" }}
-                />
-              </IconButton>
-              <p>
-                <TagIcon sx={{ color: "#777777", cursor: "pointer" }} />
-              </p>
+              {imageFile?.name && (
+                <p
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  Attached - <ImageIcon sx={{ color: "green" }} />
+                </p>
+              )}
+              {audioFile?.name && (
+                <p
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  Attached - <MusicNoteIcon sx={{ color: "green" }} />
+                </p>
+              )}
             </Box>
           </Box>
 
